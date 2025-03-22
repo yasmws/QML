@@ -1,32 +1,63 @@
 import pennylane as qml
 import numpy as np
 from encoding import embedding_layer, dev, X_scaled 
-
-# Definir um bloco unitário de dois qubits
-def unitary_block(block_params, wires):
-    for i, wire in enumerate(wires):
-        qml.RY(block_params[i], wires=wire)
-    qml.CNOT(wires=wires)
+from unitary_parameterization import simple_unitary_block, general_unitary_block, ancilla_unitary_block
 
 @qml.qnode(dev)
-def ttn_classifier(features, params):
-    # Primeira etapa: aplicar a camada de codificação importada
+def ttn_classifier(features, params, unitary_type="simple", ancilla_wire=None):
+    """
+    unitary_type: define o tipo de bloco unitário a ser utilizado ("simple", "general" ou "ancilla")
+    ancilla_wire: necessário se utilizar a parametrização com ancilla
+    """
+    # Etapa de embedding: codifica os dados no estado quântico
     embedding_layer(features)
     
-    # Aplicar blocos unitários na primeira camada (por exemplo, qubits [0,1] e [2,3])
-    unitary_block(params[0], wires=[0, 1])
-    unitary_block(params[1], wires=[2, 3])
+    # Primeira camada: aplica blocos unitários nos pares de qubits [0,1] e [2,3]
+    if unitary_type == "simple":
+        simple_unitary_block(params[0], wires=[0, 1])
+        simple_unitary_block(params[1], wires=[2, 3])
+    elif unitary_type == "general":
+        general_unitary_block(params[0], wires=[0, 1])
+        general_unitary_block(params[1], wires=[2, 3])
+    elif unitary_type == "ancilla":
+        if ancilla_wire is None:
+            raise ValueError("É necessário especificar ancilla_wire para a parametrização com ancilla")
+        ancilla_unitary_block(params[0], wires=[0, 1], ancilla_wire=ancilla_wire)
+        ancilla_unitary_block(params[1], wires=[2, 3], ancilla_wire=ancilla_wire)
+    else:
+        raise ValueError("Tipo de unidade desconhecido")
     
-    # Segunda camada: combinar os resultados (por exemplo, utilizando os qubits 1 e 3)
-    unitary_block(params[2], wires=[1, 3])
+    # Segunda camada: combina os resultados, por exemplo, aplicando um bloco em qubits 1 e 3
+    if unitary_type == "simple":
+        simple_unitary_block(params[2], wires=[1, 3])
+    elif unitary_type == "general":
+        general_unitary_block(params[2], wires=[1, 3])
+    elif unitary_type == "ancilla":
+        ancilla_unitary_block(params[2], wires=[1, 3], ancilla_wire=ancilla_wire)
     
-    # Medida final: retorno do valor de expectativa de PauliZ em um qubit
+    # Medida final: retorna o valor de expectativa do operador PauliZ no qubit 3
     return qml.expval(qml.PauliZ(3))
 
-# Exemplo de parâmetros dummy para os blocos (2 parâmetros por bloco)
-params = [np.array([0.1, 0.2]), np.array([0.3, 0.4]), np.array([0.5, 0.6])]
 
-# Selecionar uma amostra do dataset já escalado
+# Exemplos de Uso:
+
+# Para as parametrizações "simple" e "general" são 2 parâmetros por bloco
+params_simple = [np.array([0.1, 0.2]), np.array([0.3, 0.4]), np.array([0.5, 0.6])]
+# params_general = [np.array([0.1]*15), np.array([0.2]*15), np.array([0.3]*15)]
+# # Para a parametrização com ancilla, o vetor de parâmetros pode ter tamanho diferente
+# params_ancilla = [np.array([0.1]*20), np.array([0.2]*20), np.array([0.3]*20)]
+
 sample_features = X_scaled[0]
-prediction = ttn_classifier(sample_features, params)
-print("Saída do classificador (valor de expectativa):", prediction)
+
+# Executa o classificador utilizando a parametrização simples
+output_simple = ttn_classifier(sample_features, params_simple, unitary_type="simple")
+print("Saída (Simple):", output_simple)
+
+# # Executa o classificador utilizando a parametrização geral
+# output_general = ttn_classifier(sample_features, params_general, unitary_type="general")
+# print("Saída (General):", output_general)
+
+# # Se utilizar a parametrização com ancilla, o dispositivo tem que ter um fio extra.
+# # Neste exemplo, o qubit ancilla é o fio 4.
+# output_ancilla = ttn_classifier(sample_features, params_ancilla, unitary_type="ancilla", ancilla_wire=4)
+# print("Saída (Ancilla):", output_ancilla)
