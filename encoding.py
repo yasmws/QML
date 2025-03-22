@@ -17,15 +17,7 @@ num_qubits = X.shape[1]
 # Criar o dispositivo quântico simulado
 dev = qml.device("default.qubit", wires=num_qubits)
 
-# Definir o circuito quântico de encoding
-@qml.qnode(dev)
-def quantum_embedding(features):
+# Função de codificação: aplica as rotações de codificação em cada qubit
+def embedding_layer(features):
     for i in range(num_qubits):
-        qml.RY(features[i], wires=i)  # Rotação Y para cada qubit com base na feature
-    return qml.state()
-
-# Testando com uma amostra do dataset
-sample_data = X_scaled[0]
-quantum_state = quantum_embedding(sample_data)
-
-print("Quantum State Representation:", quantum_state)
+        qml.RY(2 * features[i], wires=i)
