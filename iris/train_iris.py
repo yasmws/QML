@@ -40,9 +40,9 @@ def train_model(dataset_name, X_train, X_test, y_train, y_test):  #Função de t
     num_weights = 7  #Número de parâmetros ajustáveis
     weights = qml.numpy.random.uniform(0, 1, num_weights, requires_grad=True)  #Inicializa pesos aleatórios
 
-    opt = AdamOptimizer(stepsize=0.1)  #Cria otimizador Adam com taxa de aprendizado 0.1
+    opt = AdamOptimizer(stepsize=0.1)  #Otimizador Adam com taxa de aprendizado 0.1 (artigo pede)
 
-    epochs = 50  #Número de épocas de treino
+    epochs = 10 #Número de épocas de treino
     batch_size = 10  #Tamanho do lote para processamento dos dados
 
     for epoch in range(epochs):  #Loop de treinamento
@@ -70,4 +70,4 @@ if __name__ == "__main__":  #Bloco principal de execução
         data["y_train"],
         data["y_test"]
     )
-    print("Acurácia final:", acc)  #Exibe a precisão final do modelo
+    #print("Acurácia final:", acc)  #Exibe a precisão final do modelo

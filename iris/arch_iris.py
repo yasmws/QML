@@ -25,4 +25,4 @@ def ttn_circuit(features,weights): #Def do circuito TTN, que recebe features e p
     qml.CNOT(wires=[1,2]) #Emaranhamento entre os qubits 1 e 2
    
     
-    return qml.expval(qml.PauliY(2)) #Medição da expectativa do operador Pauli (estou sando x, y e z de forma empirica a achar a melhor) no qubit de saída (2)
+    return qml.expval(qml.PauliZ(2)) #Medição da expectativa do operador Pauli (estou sando x, y e z de forma empirica a achar a melhor) no qubit de saída (2)
