@@ -4,12 +4,27 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.datasets import mnist
 from sklearn.model_selection import train_test_split
 
-def load_mnist_data():
+def load_mnist_data(task):
     (x_train_val, y_train_val), (x_test, y_test) = mnist.load_data()
     
-    #binariza rótulos (1 para >4, 0 para <=4)
-    y_train_val = (y_train_val > 4).astype(float) 
-    y_test = (y_test > 4).astype(float)
+    if task == 'gt4':
+        #binariza rótulos (1 para >4, 0 para <=4)
+        y_train_val = (y_train_val > 4).astype(float) 
+        y_test = (y_test > 4).astype(float)
+    elif task == 'even':
+        #binariza rótulos (1 para par, 0 para ímpar)
+        y_train_val = (y_train_val % 2 == 0).astype(float) 
+        y_test = (y_test % 2 == 0).astype(float)
+    elif task == '0or1':
+        #binariza rótulos (1 para 1, 0 para 0)
+        y_train_val = (y_train_val == 1).astype(float) 
+        y_test = (y_test == 1).astype(float)
+    elif task == '2or7':
+        #binariza rótulos (1 para 2, 0 para 7)
+        y_train_val = (y_train_val == 2).astype(float) 
+        y_test = (y_test == 2).astype(float)
+    else:
+        raise ValueError("Task not recognized. Use 'gt4', 'even', '0or1', or '2or7'.")
     
     #separa treino (55k), validação (5k) e teste (10k)
     x_train, x_val, y_train, y_val = train_test_split(

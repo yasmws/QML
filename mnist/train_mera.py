@@ -15,28 +15,28 @@ def train_and_evaluate(task):
     (x_train, y_train), (x_val, y_val), (x_test, y_test) = load_mnist_data(task)
     x_train, x_val, x_test = reduce_dimensions(x_train, x_val, x_test, n_components=4)
     
-    #inicializa o circuito
+    # Inicializa o circuito
     num_qubits = 4
-    num_weights = 6  # Tem que mudar para 6 quando usar TTN
-    #num_weights = 5 # Tem que mudar para 5 quando usar MERA
-    weights = np.random.rand(num_weights)  
-    ttn = create_simple_ttn(num_qubits)
-    #mera = create_simple_mera(num_qubits, num_weights)
+    # Para MERA, o número de blocos (num_weights) deve ser 5.
+    num_weights = 5  
+    # Cada bloco recebe 2 parâmetros, logo, os pesos terão shape (5,2)
+    weights = np.random.rand(num_weights, 2)
     
+    # Use a arquitetura MERA
+    mera = create_simple_mera(num_qubits, num_weights)
     
     def cost(weights, features, labels):
-        predictions = [ttn(f, weights) for f in features]  # Muda a arquitetura aqui dependendo do que quer testar
+        predictions = [mera(f, weights) for f in features]
         return np.mean((predictions - labels) ** 2)
     
-    
-    #Otimização com Adam e Early Stopping
+    # Otimização com Adam e Early Stopping
     opt = qml.AdamOptimizer(stepsize=0.1)
     best_weights = None
     best_val_acc = 0
     patience = 30
     no_improvement = 0
     
-    for epoch in range(100): #Testando com 100 épocas
+    for epoch in range(100):  # Testando com 100 épocas
         batch_idx = np.random.choice(len(x_train), 20)
         x_batch, y_batch = x_train[batch_idx], y_train[batch_idx]
         
@@ -45,8 +45,8 @@ def train_and_evaluate(task):
             weights
         )
         
-        if epoch % 10 == 0: #Avalia validação a cada 10 épocas
-            val_predictions = [1 if ttn(x, weights) >= 0 else 0 for x in x_val] # Muda a arquitetura aqui também
+        if epoch % 10 == 0:  # Avalia validação a cada 10 épocas
+            val_predictions = [1 if mera(x, weights) >= 0 else 0 for x in x_val]
             val_acc = np.mean(val_predictions == y_val) 
             
             if val_acc > best_val_acc:
@@ -60,12 +60,12 @@ def train_and_evaluate(task):
                 print("Early stopping!")
                 break
     
-    #Avaliação final 
-    test_predictions = [1 if mera(x, best_weights) >= 0 else 0 for x in x_test] # Muda a arquitetura aqui também
+    # Avaliação final 
+    test_predictions = [1 if mera(x, best_weights) >= 0 else 0 for x in x_test]
     return np.mean(test_predictions == y_test)
 
 if __name__ == "__main__":
-    np.random.seed(42) #Sentido da Vida, do Universo e Tudo Mais
+    np.random.seed(42)  # Sentido da Vida, do Universo e Tudo Mais
     accuracies = []
     tasks = ['gt4', 'even', '0or1', '2or7']
     means = []
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     for task in tasks:
         print(f"\n=== Treinamento e Avaliação para a tarefa: {task} ===")
     
-        for run in range(5): #5 inicializações aleatórias
+        for run in range(5):  # 5 inicializações aleatórias
             print(f"\nExecução {run+1}/5 ")
             acc = train_and_evaluate(task)
             accuracies.append(acc)
@@ -106,7 +106,3 @@ if __name__ == "__main__":
     # Salvar a tabela como imagem
     plt.savefig("resultados_tabela.png", bbox_inches='tight')
     plt.show()
-            
-    
-            
-            
