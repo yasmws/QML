@@ -5,7 +5,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import pennylane as qml
-import pennylane.numpy as np  # Use a versão diferenciável do numpy
+import pennylane.numpy as np  
 from encoding_mnist import load_mnist_data, reduce_dimensions
 from arch_mnist import create_simple_ttn
 
@@ -13,17 +13,17 @@ def train_and_evaluate():
     (x_train, y_train), (x_val, y_val), (x_test, y_test) = load_mnist_data()
     x_train, x_val, x_test = reduce_dimensions(x_train, x_val, x_test, n_components=4)
     
-    # Inicializa o circuito
+    #Inicializa o circuito
     num_qubits = 4
     num_weights = 7
-    weights = np.random.rand(num_weights)  # Agora weights é um array diferenciável
+    weights = np.random.rand(num_weights)  
     ttn = create_simple_ttn(num_qubits)
     
     def cost(weights, features, labels):
         predictions = [ttn(f, weights) for f in features]
         return np.mean((np.array(predictions) - labels) ** 2)
     
-    # Otimização com Adam e Early Stopping
+    #Otimização com Adam e Early Stopping
     opt = qml.AdamOptimizer(stepsize=0.1)
     best_weights = None
     best_val_acc = 0
@@ -39,9 +39,9 @@ def train_and_evaluate():
             weights
         )
         
-        if epoch % 10 == 0:  # Avalia validação a cada 10 épocas
+        if epoch % 10 == 0:  #Avalia validação a cada 10 épocas
 
-            print(f"Época {epoch}: pesos = {weights}")
+            print(f"Época {epoch}: pesos = {weights}") #print a cada 10 épocas
             
             val_predictions = [1 if ttn(x, weights) >= 0 else 0 for x in x_val]
             val_acc = np.mean(np.array(val_predictions) == y_val)
@@ -57,7 +57,7 @@ def train_and_evaluate():
                 print("Early stopping!")
                 break
     
-    # Avaliação final 
+    #Avaliação final 
     test_predictions = [1 if ttn(x, best_weights) >= 0 else 0 for x in x_test]
     return np.mean(np.array(test_predictions) == y_test)
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     np.random.seed(42)  # Sentido da Vida, do Universo e Tudo Mais
     accuracies = []
     
-    for run in range(5):  # 5 inicializações aleatórias
+    for run in range(5):  #5 inicializações aleatórias
         print(f"\nExecução {run+1}/5 ")
         acc = train_and_evaluate()
         accuracies.append(acc)
