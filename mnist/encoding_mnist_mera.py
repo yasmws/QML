@@ -25,6 +25,7 @@ def load_mnist_data(task):
         # Binariza os rótulos: 1 para dígito 1, 0 para dígito 0.
         y_train_val = (y_train_val == 1).astype(float)
         y_test = (y_test == 1).astype(float)
+        
     elif task == '2or7':
         # Seleciona apenas os dígitos 2 e 7
         train_filter = (y_train_val == 2) | (y_train_val == 7)
