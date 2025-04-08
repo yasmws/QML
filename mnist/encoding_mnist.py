@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 def load_mnist_data():
     (x_train_val, y_train_val), (x_test, y_test) = mnist.load_data()
-    
+
     #binariza rótulos (1 para >4, 0 para <=4)
     y_train_val = (y_train_val > 4).astype(float) 
     y_test = (y_test > 4).astype(float)
