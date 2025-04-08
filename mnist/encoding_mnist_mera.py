@@ -16,12 +16,24 @@ def load_mnist_data(task):
         y_train_val = (y_train_val % 2 == 0).astype(float) 
         y_test = (y_test % 2 == 0).astype(float)
     elif task == '0or1':
-        #binariza rótulos (1 para 1, 0 para 0)
-        y_train_val = (y_train_val == 1).astype(float) 
+        # Seleciona apenas os dígitos 0 e 1
+        train_filter = (y_train_val == 0) | (y_train_val == 1)
+        test_filter = (y_test == 0) | (y_test == 1)
+        x_train_val, y_train_val = x_train_val[train_filter], y_train_val[train_filter]
+        x_test, y_test = x_test[test_filter], y_test[test_filter]
+        
+        # Binariza os rótulos: 1 para dígito 1, 0 para dígito 0.
+        y_train_val = (y_train_val == 1).astype(float)
         y_test = (y_test == 1).astype(float)
     elif task == '2or7':
-        #binariza rótulos (1 para 2, 0 para 7)
-        y_train_val = (y_train_val == 2).astype(float) 
+        # Seleciona apenas os dígitos 2 e 7
+        train_filter = (y_train_val == 2) | (y_train_val == 7)
+        test_filter = (y_test == 2) | (y_test == 7)
+        x_train_val, y_train_val = x_train_val[train_filter], y_train_val[train_filter]
+        x_test, y_test = x_test[test_filter], y_test[test_filter]
+        
+        # Binariza os rótulos: 1 para dígito 2, 0 para dígito 7.
+        y_train_val = (y_train_val == 2).astype(float)
         y_test = (y_test == 2).astype(float)
     else:
         raise ValueError("Task not recognized. Use 'gt4', 'even', '0or1', or '2or7'.")
